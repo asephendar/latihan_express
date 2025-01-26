@@ -1,21 +1,28 @@
-const { Pool } = require('pg');
+const { Sequelize, DataTypes } = require('sequelize');
 require('dotenv').config();
 
-const pool = new Pool({
-  user: process.env.DB_USER,           // Username PostgreSQL
-  host: process.env.DB_HOST,           // Host PostgreSQL (misalnya 'localhost')
-  database: process.env.DB_NAME,       // Nama database
-  password: process.env.DB_PASSWORD,   // Password PostgreSQL
-  port: process.env.DB_PORT || 5432,   // Port PostgreSQL (default: 5432)
-});
+// Membuat instance Sequelize dan menghubungkannya ke PostgreSQL
+const sequelize = new Sequelize(
+  process.env.DB_NAME,     // Nama database
+  process.env.DB_USER,     // Username
+  process.env.DB_PASSWORD, // Password
+  {
+    host: process.env.DB_HOST,
+    dialect: 'postgres',
+    logging: false,  // Menonaktifkan log query (opsional)
+  }
+);
 
-// Cek koneksi ke database
-pool.connect()
-  .then(() => {
+// Menghubungkan Sequelize ke database
+const connectDB = async () => {
+  try {
+    await sequelize.authenticate();
     console.log('Koneksi ke database berhasil!');
-  })
-  .catch(err => {
+  } catch (err) {
     console.error('Gagal terhubung ke database:', err);
-  });
+  }
+};
 
-module.exports = pool;
+connectDB();
+
+module.exports = { sequelize, DataTypes };
